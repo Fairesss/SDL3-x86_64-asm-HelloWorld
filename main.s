@@ -15,19 +15,11 @@
 title:
 	.string "Hello, World!"
 
-p_fmt:
-	.string "%.2f %0.f\n"
 	
 m_x:
 	.int 	0
 m_y:
 	.int	0
-r:
-	.int 	0
-b:
-	.int 	0
-g:
-	.int 	0
 
 	.text
 	.global _start
@@ -112,7 +104,7 @@ render_loop:
 	
 	movl  	m_y, %edx
 	
-	movl  	b, %ecx
+	movl  	0, %ecx
 
 	movq	$255, %r8
 	
