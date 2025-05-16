@@ -1,7 +1,7 @@
 	.set	SDL_INIT_VIDEO, 	0x20
 	.set	SDL_EVENT_QUIT, 	0x100
 	.set	SDL_EVENT_MOUSE_MOTION, 0x200
-
+	
 	.macro div_macro n, d, q, r
 	movq	\n, %rax
 	movq	\d, %rbx
