@@ -56,7 +56,9 @@ set_mouse:
 	
 	addq	$16, %rsp
 	popq	%rbp
-	ret 
+	ret
+
+
 _start:
 	movq	%rsp, %rbp
 	subq  	$160, %rsp
