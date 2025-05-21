@@ -1,8 +1,9 @@
 	.set	SDL_INIT_VIDEO, 	0x20
 	.set	SDL_EVENT_QUIT, 	0x100
 	.set	SDL_EVENT_MOUSE_MOTION, 0x200
+	.set	SDL_WINDOW_VULKAN,	0x10000000
 	
-	.macro div_macro n, d, q, r
+	.macro divm n, d, q, r
 	movq	\n, %rax
 	movq	\d, %rbx
 	xor	%rdx, %rdx
@@ -10,6 +11,14 @@
 	movq	%rax, \q
 	movq	%rdx, \r
 	.endm
+
+	.macro ftoi src, dst
+	cvtss2si	\src, \dst
+	.endm
+	
+	.bss
+VkApplicationInfo:
+	.skip 48
 	
 	.data
 title:
@@ -41,17 +50,17 @@ set_mouse:
 	movss	0(%rsp), %xmm0
 	movss	4(%rsp), %xmm1
 
-	cvtss2si %xmm0, %r10
-	cvtss2si %xmm1, %r11
+	ftoi	%xmm0, %r10
+	ftoi	%xmm1, %r11
 
 	movq	%r10, m_x
 	movq	%r11, m_y
 
 
-	div_macro %r10, $255, %rax, %rdx
+	divm	%r10, $255, %rax, %rdx
 	movq 	%rdx, m_x
 
-	div_macro %r11, $255, %rax, %rdx
+	divm	%r11, $255, %rax, %rdx
 	movq	%rdx, m_y
 	
 	addq	$16, %rsp
@@ -61,7 +70,7 @@ set_mouse:
 
 _start:
 	movq	%rsp, %rbp
-	subq  	$160, %rsp
+	subq  	$0x10, %rsp
 
 	movq 	$SDL_INIT_VIDEO, %rdi 
 	call 	SDL_Init
@@ -69,8 +78,10 @@ _start:
 	leaq 	title(%rip), %rdi
 	movq 	$255, %rsi
 	movq 	$255, %rdx
-	xor  	%rcx, %rcx
+	movq  	$SDL_WINDOW_VULKAN, %rcx
 	call 	SDL_CreateWindow
+
+	
 	
 	movq 	%rax, (%rsp)
 
@@ -96,21 +107,18 @@ input_loop:
 	
 
 	jmp input_loop
-
-
 render_loop:	
 
-	movq 	8(%rsp), %rdi
-	
 	movl 	m_x, %esi
 	
 	movl  	m_y, %edx
 	
-	movl  	0, %ecx
+	movl  	$0, %ecx
 
 	movq	$255, %r8
 	
 	movq 	8(%rsp), %rdi
+
 	call 	SDL_SetRenderDrawColor
 
 	movq 	8(%rsp), %rdi
@@ -118,9 +126,6 @@ render_loop:
 
 	movq 	8(%rsp), %rdi
 	call 	SDL_RenderPresent
-
-	movq 	$10, %rdi
-	call 	SDL_Delay
 
 	jmp 	loop
 
